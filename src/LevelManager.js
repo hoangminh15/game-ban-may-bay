@@ -67,7 +67,9 @@ var LevelManager = cc.Class.extend({
             case MW.ENEMY_MOVE_TYPE.ATTACK:
                 offset = cc.p(this._gameLayer._ship.x, this._gameLayer._ship.y);
                 a0 = cc.moveTo(1, offset);
-
+                var delay = cc.delayTime(1);
+                var selfDestroyedAction = cc.callFunc(addEnemy.destroy, addEnemy);
+                tmpAction = cc.sequence(a0, delay, selfDestroyedAction);
                 break;
             case MW.ENEMY_MOVE_TYPE.VERTICAL:
                 offset = cc.p(0, -winSize.height - addEnemy.height);
