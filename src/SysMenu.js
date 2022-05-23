@@ -14,7 +14,7 @@ var SysMenu = cc.Layer.extend({
 
         this.initBackGround();
 
-        var singalHeight = MW.menuHeight;12
+        var singalHeight = MW.menuHeight;
         var singalWidth = MW.menuWidth;
         var newGameNormal = new cc.Sprite(res.menu_png, cc.rect(0, 0, singalWidth, singalHeight));
         var newGameSelected = new cc.Sprite(res.menu_png, cc.rect(0, singalHeight, singalWidth, singalHeight));

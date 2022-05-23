@@ -28,6 +28,10 @@
         "src/SysMenu.js",
         "src/HitEffect.js",
         "src/SparkEffect.js",
-        "src/Background.js"
+        "src/Background.js",
+
+        "src/miniproject/GameConfig.js",
+        "src/miniproject/Resource.js",
+        "src/miniproject/SystemMenu.js"
     ]
 }
