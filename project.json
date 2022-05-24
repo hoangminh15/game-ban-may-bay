@@ -33,6 +33,9 @@
         "src/miniproject/GameConfig.js",
         "src/miniproject/Resource.js",
         "src/miniproject/GameLayer.js",
-        "src/miniproject/SystemMenu.js"
+        "src/miniproject/SystemMenu.js",
+        "src/miniproject/Jumper.js",
+        "src/miniproject/Background.js",
+        "src/miniproject/Platform.js"
     ]
 }

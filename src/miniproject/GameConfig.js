@@ -14,8 +14,11 @@ JJ.LEVEL = {
 }
 
 JJ.CONTAINER = {
-
+    PLATFORMS: [],
+    BACKGROUNDS: [],
 }
+
+JJ.PLATFORMS = []
 
 JJ.KEYS = []
 
@@ -24,3 +27,7 @@ JJ.KEYTIME = []
 JJ.WIDTH = 480;
 JJ.HEIGHT = 720;
 JJ.SCALE = 1.5;
+
+//Bug with map.png. Can retrieve map width
+JJ.MAPWIDTH = 126;
+JJ.MAPLENGTH = 231;
