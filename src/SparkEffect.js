@@ -8,7 +8,7 @@ var SparkEffect = cc.Class.extend({
     duration:0.7,
     ctor:function () {
         this.spark1 = new cc.Sprite("#explode2.png");
-        //this.spark1.setBlendFunc(cc.SRC_ALPHA, cc.ONE);
+        this.spark1.setBlendFunc(cc.SRC_ALPHA, cc.ONE);
         this.spark2 = new cc.Sprite("#explode3.png");
         //this.spark2.setBlendFunc(cc.SRC_ALPHA, cc.ONE);
     },

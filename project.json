@@ -6,7 +6,7 @@
     "renderMode" : 0,
     "engineDir":"frameworks/cocos2d-html5",
 
-    "modules" : ["cocos2d"],
+    "modules" : ["cocos2d", "extensions"],
 
     "jsList" : [
         "src/Resource.js",
@@ -32,6 +32,7 @@
 
         "src/miniproject/GameConfig.js",
         "src/miniproject/Resource.js",
+        "src/miniproject/GameLayer.js",
         "src/miniproject/SystemMenu.js"
     ]
 }
