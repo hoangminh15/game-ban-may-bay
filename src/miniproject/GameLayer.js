@@ -17,6 +17,10 @@ var GameLayer = cc.Layer.extend({
     life: null,
     background: null,
     isAirborne: false,
+    platformBatch: null,
+    space: null,
+    numOfMap: null,
+    currentMapIndex: null,
 
     ctor: function () {
         this._super();
@@ -57,56 +61,68 @@ var GameLayer = cc.Layer.extend({
         this.life.color = cc.color(255, 0, 0);
         this.addChild(this.life, 1000);
 
-        // Jumper
-        this.jumper = new Jumper();
-        this.jumper.attr({
-            x: winSize.width / 2,
-            y: winSize.height / 2
-        });
-        this.addChild(this.jumper, 1000);
-
-        // Play musics and sound effects.
-
-
         //Preset
         Background.preset();
-        Platform.preset();
 
         //Initialize background
         this.initBackground();
-        this.initPlatform();
 
+        // //Initialize platforms
+        // Platforms initialization is relocated to initPhysics
+        // this.initPlatforms();
+
+        //Initialize physics
+        this.initPhysics();
+
+        //Listener
         this.addKeyBoardListener();
+        // Update
         this.scheduleUpdate()
+        // this.schedule(this.updateUI, 2);
+
         return true;
     },
+    initPhysics: function () {
+        //setup static information
+        this.space = new cp.Space();
+        //setup gravity
+        this.space.gravity = cp.v(0, -350);
+        // setup walls
+        var ground = new cp.SegmentShape(
+            this.space.staticBody
+            , cp.v(0, 0) //start point
+            , cp.v(JJ.WIDTH, 0) //end point
+            , g_groundHeight // thickness of wall
+        );
+        ground.setFriction(100);
+        // ground.setElasticity(10);
+        this.space.addStaticShape(ground);
+        this.addChild(new AnimationLayer(this.space), 3000, "Animation Layer");
+    },
     initBackground: function () {
-        this.map = new cc.Sprite(res.map_png);
-        this.map.setAnchorPoint(cc.p(0.5, 0.5));
-        this.map.setPosition(winSize.width / 2, winSize.height / 2);
-        cc.log(this.map)
+        this.map = new cc.Sprite(res.mapEntry_png);
+        this.map.setAnchorPoint(cc.p(0, 0));
+        this.map.setPosition(0, 0);
         this.map.setScale(winSize.width / JJ.MAPWIDTH);
 
         this.addChild(this.map, 500);
     },
-    initPlatform: function () {
-        for (var i = 0; i < 10; i++) {
-            var platform = Platform.getOrCreate();
-            platform.setPosition(Math.random() * winSize.width, winSize.height / 10 * i);
-            this.addChild(platform, 3000);
-        }
-    },
     update: function (dt) {
         if (this.state == STATE_PLAYING) {
-            this.checkIsCollide();
+            // this.checkIsCollide();
             this.updateUI();
-            this.moveBackground(dt);
+            this.space.step(dt);
         }
     },
     updateUI: function () {
         //Update score if jumper is in a higher position.
-
+        // cc.log(this.jumper);
         //Go to next background if jumper jumps over the background celling
+        // var currentMapIndex = Math.floor(this.jumper.getPosition().y / JJ.MAPWIDTH) - 1;
+        // if (this.jumper.y > currentMapIndex * JJ.WIDTH + JJ.WIDTH/2) {
+        //     var action = cc.moveBy(0.5, 0, -JJ.HEIGHT/2);
+        //     this.map.runAction(action);
+        // }
     },
     moveBackground: function (dt) {
 
@@ -147,7 +163,6 @@ var GameLayer = cc.Layer.extend({
         }
     }
 
-
 });
 
 GameLayer.scene = function () {
@@ -156,3 +171,8 @@ GameLayer.scene = function () {
     scene.addChild(layer);
     return scene;
 }
+
+//Why??
+// GameLayer.prototype.addPlatform = function(platform, z, tag) {
+//     this.platformBatch.addChild(platform, z, tag);
+// }
