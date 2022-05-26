@@ -12,6 +12,7 @@ var Jumper = cc.PhysicsSprite.extend({
         this.anchorY = 0.5;
         this.tag = this.zOrder;
 
+
         this.scheduleUpdate();
     },
     update: function (dt) {

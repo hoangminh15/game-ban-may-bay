@@ -96,7 +96,7 @@ var GameLayer = cc.Layer.extend({
         this.jumper = this.animationLayer.getJumper();
         this.addChild(this.animationLayer, 3000, "Animation Layer");
     },
-    collisionPlatformBegin: function(arbiter, space) {
+    collisionPlatformBegin: function (arbiter, space) {
         cc.log("Headbang a platform");
     },
     initBackground: function () {
@@ -121,23 +121,30 @@ var GameLayer = cc.Layer.extend({
         // Update score if jumper is in a higher position.
         // Follow jumper if jumper jumps over the background celling
         var jumperPosition = this.jumper.y;
-        // var middleScreenY = (this.bottomScreenY + this.topScreenY) / 2;
-        var followAction = cc.follow(this.jumper, cc.rect(0, 0, JJ.WIDTH, JJ.HEIGHT*2));
+        var middleScreenY = (this.bottomScreenY + this.topScreenY) / 2;
+        var followAction = cc.follow(this.jumper, cc.rect(0, 0, JJ.WIDTH, JJ.HEIGHT * 2));
+        var followActionDown = cc.follow(this.jumper, cc.rect(0, -JJ.HEIGHT, JJ.WIDTH, JJ.HEIGHT * 2))
+        if (jumperPosition > middleScreenY) {
+            this.animationLayer.createPlatforms();
+        }
         if (jumperPosition > this.topScreenY) {
             // Update platform and jumper position: move up by subtract offset y
-            this.runAction(followAction);
-            this.bottomScreenY = this.topScreenY;
-            cc.log("Jumped over top screen");
+            this.runAction(followAction.clone());
+            this.bottomScreenY = this.topScreenY - JJ.HEIGHT / 2;
+            this.topScreenY = this.topScreenY + JJ.HEIGHT / 2;
+            // cc.log("Top screen: " + this.topScreenY);
+            // cc.log("Bottom screen: " + this.bottomScreenY);
+            // cc.log("Jumped over top screen");
             return;
         }
-        // cc.log("Bottom Screen " + this.bottomScreenY);
-        // cc.log("Top Screen " + this.topScreenY);
+        cc.log("Bottom Screen " + this.bottomScreenY);
+        cc.log("Top Screen " + this.topScreenY);
+
         if (jumperPosition < this.bottomScreenY) {
-            cc.log("Droped over bottom screen");
-            this.topScreenY = this.bottomScreenY;
-            this.bottomScreenY = this.bottomScreenY - JJ.HEIGHT;
-            this.runAction(followAction.clone());
-            return;
+            // cc.log("Droped below bottom screen");
+            this.topScreenY = this.bottomScreenY + JJ.HEIGHT / 2;
+            this.bottomScreenY = this.bottomScreenY - JJ.HEIGHT / 2;
+            this.runAction(followActionDown.clone());
         }
 
     },

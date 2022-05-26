@@ -16,8 +16,9 @@ var AnimationLayer = cc.Layer.extend({
         // Create jumper
         this.jumper = new Jumper(res.mainJumper_png);
         // Init jumper physics body
-        // this.body = new cp.Body(1, cp.momentForBox(1, JJ.JUMPERWIDTH + 10, JJ.JUMPERHEIGHT));
-        this.body = new cp.Body(1, cp.momentForBox(1, JJ.JUMPERWIDTH, 0));
+        // this.body = new cp.Body(1, cp.momentForBox(1, JJ.JUMPERWIDTH, 1));
+        this.body = new cp.Body(1, cp.momentForBox(1, 1000000, 100000));
+        this.body.damping = 0;
         // Set the spawn position of jumper
         this.body.p = cc.p(g_jumperStartX, g_groundHeight + JJ.JUMPERHEIGHT / 2);
         // apply impulse to the body
@@ -30,7 +31,7 @@ var AnimationLayer = cc.Layer.extend({
         this.space.addShape(this.shape);
         // set body to the physics sprite
         this.jumper.setBody(this.body);
-        this.jumper.setIgnoreBodyRotation(true)
+        this.jumper.setIgnoreBodyRotation(false)
         this.addChild(this.jumper, 3000);
         this.createPlatforms();
     },
@@ -43,7 +44,7 @@ var AnimationLayer = cc.Layer.extend({
             this.highestPlatformHeight += JJ.PLATFORMDISTANCE;
             body.setPos(cc.p(JJ.WIDTH * Math.random(), this.highestPlatformHeight));
             this.platform.setBody(body);
-            this.shape = new cp.BoxShape(body, (JJ.PLATFORMWIDTH + 10), JJ.PLATFORMHEIGHT - 5);
+            this.shape = new cp.BoxShape(body, (JJ.PLATFORMWIDTH + 10), JJ.PLATFORMHEIGHT+30);
 
             this.shape.setCollisionType(JJ.SPRITETAG.PLATFORM);
             this.shape.setFriction(100);
@@ -55,20 +56,7 @@ var AnimationLayer = cc.Layer.extend({
     getJumper: function() {
         return this.jumper;
     },
-    moveSpritesUp: function() {
-        var platform = null;
-        for (var i = 0; i < JJ.CONTAINER.PLATFORMS.length; i++) {
-            platform = JJ.CONTAINER.PLATFORMS[i];
-            platform.y = platform.y - JJ.WIDTH/2;
-        }
-        this.jumper.y -= JJ.WIDTH/2;
-    },
-    moveSpritesDown: function() {
-        var platform = null;
-        for (var i = 0; i < JJ.CONTAINER.PLATFORMS.length; i++) {
-            platform = JJ.CONTAINER.PLATFORMS[i];
-            platform.y = platform.y + JJ.WIDTH/2;
-        }
-        this.jumper.y += JJ.WIDTH/2;
-    }
+    // getHighestPlatformHeight: function() {
+    //     return this.highestPlatformHeight;
+    // }
 })
