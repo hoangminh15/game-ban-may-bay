@@ -18,11 +18,6 @@ var SystemMenu = cc.Layer.extend({
     }
 })
 
-
-var stopSound = function () {
-    cc.audioEngine.stopAllEffects();
-}
-
 SystemMenu.scene = function () {
     var scene = new cc.Scene();
     var layer = new SystemMenu();

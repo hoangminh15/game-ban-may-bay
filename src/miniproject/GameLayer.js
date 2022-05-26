@@ -21,6 +21,9 @@ var GameLayer = cc.Layer.extend({
     space: null,
     numOfMap: null,
     currentMapIndex: null,
+    bottomScreenY: null,
+    topScreenY: null,
+    animationLayer: null,
 
     ctor: function () {
         this._super();
@@ -44,41 +47,20 @@ var GameLayer = cc.Layer.extend({
         this.score.textAlign = cc.TEXT_ALIGNMENT_RIGHT;
         this.addChild(this.score, 1000);
 
-        // Life Icon (working)
-        var lifeIcon = new cc.Sprite(res.mainJumper_png);
-        lifeIcon.attr({
-            anchorX: 0,
-            anchorY: 1,
-            x: 10,
-            y: winSize.height - 10
-        });
-        this.addChild(lifeIcon, 1000);
-
-        // Life Count
-        this.life = new cc.LabelTTF("0", "Arial", 20);
-        this.life.x = 60;
-        this.life.y = JJ.HEIGHT - 25;
-        this.life.color = cc.color(255, 0, 0);
-        this.addChild(this.life, 1000);
-
         //Preset
         Background.preset();
-
-        //Initialize background
-        this.initBackground();
-
-        // //Initialize platforms
-        // Platforms initialization is relocated to initPhysics
-        // this.initPlatforms();
 
         //Initialize physics
         this.initPhysics();
 
+        //Initialize background
+        this.initBackground();
+
         //Listener
         this.addKeyBoardListener();
         // Update
-        this.scheduleUpdate()
-        // this.schedule(this.updateUI, 2);
+        this.scheduleUpdate();
+        this.schedule(this.scoreCounter, 1);
 
         return true;
     },
@@ -97,7 +79,9 @@ var GameLayer = cc.Layer.extend({
         ground.setFriction(100);
         // ground.setElasticity(10);
         this.space.addStaticShape(ground);
-        this.addChild(new AnimationLayer(this.space), 3000, "Animation Layer");
+        this.animationLayer = new AnimationLayer(this.space);
+        this.jumper = this.animationLayer.getJumper();
+        this.addChild(this.animationLayer, 3000, "Animation Layer");
     },
     initBackground: function () {
         this.map = new cc.Sprite(res.mapEntry_png);
@@ -105,48 +89,28 @@ var GameLayer = cc.Layer.extend({
         this.map.setPosition(0, 0);
         this.map.setScale(winSize.width / JJ.MAPWIDTH);
 
+        this.bottomScreenY = 0;
+        this.topScreenY = cc.winSize.height;
+
         this.addChild(this.map, 500);
     },
     update: function (dt) {
         if (this.state == STATE_PLAYING) {
             // this.checkIsCollide();
-            this.updateUI();
             this.space.step(dt);
         }
     },
     updateUI: function () {
-        //Update score if jumper is in a higher position.
-        // cc.log(this.jumper);
-        //Go to next background if jumper jumps over the background celling
-        // var currentMapIndex = Math.floor(this.jumper.getPosition().y / JJ.MAPWIDTH) - 1;
-        // if (this.jumper.y > currentMapIndex * JJ.WIDTH + JJ.WIDTH/2) {
-        //     var action = cc.moveBy(0.5, 0, -JJ.HEIGHT/2);
-        //     this.map.runAction(action);
-        // }
-    },
-    moveBackground: function (dt) {
+        // Update score if jumper is in a higher position.
 
-    },
-    checkIsCollide: function (dt) {
-        var jumper = this.jumper;
-        var platform;
-        var platformBoundingBox, jumperBoundingBox;
-        // Có phải là lặp qua tất cả các platform và kiểm tra?
-        for (var i = 0; i < JJ.CONTAINER.PLATFORMS.length; i++) {
-            platform = JJ.PLATFORMS[i];
-            jumperBoundingBox = jumper.getBoundingBox();
-            platformBoundingBox = jumper.getBoundingBox();
-            if (cc.rectIntersectsRect(jumperBoundingBox, platformBoundingBox)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+        // Go to next background if jumper jumps over the background celling
+
     },
     addKeyBoardListener: function () {
         if (cc.sys.capabilities.hasOwnProperty('keyboard')) {
             cc.eventManager.addListener({
                 event: cc.EventListener.KEYBOARD,
+                swallowTouches: true,
                 onKeyPressed: function (key, event) {
                     JJ.KEYS[key] = true;
                 },
@@ -158,11 +122,9 @@ var GameLayer = cc.Layer.extend({
     },
     scoreCounter: function () {
         if (this.state == STATE_PLAYING) {
-            // this.time++;
-            // this.score.setString(this.time);
+            this.score.setString(Math.floor(this.jumper.y).toString())
         }
     }
-
 });
 
 GameLayer.scene = function () {
@@ -171,8 +133,3 @@ GameLayer.scene = function () {
     scene.addChild(layer);
     return scene;
 }
-
-//Why??
-// GameLayer.prototype.addPlatform = function(platform, z, tag) {
-//     this.platformBatch.addChild(platform, z, tag);
-// }
