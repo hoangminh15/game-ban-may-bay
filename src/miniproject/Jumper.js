@@ -17,8 +17,9 @@ var Jumper = cc.PhysicsSprite.extend({
     update: function (dt) {
         this.updateMove(dt);
     },
+
     updateMove: function (dt) {
-        // Nhảy
+        // Sửa các nhảy
         if (JJ.KEYS[cc.KEY.up]) {
             this.y += dt * this.speed;
         }

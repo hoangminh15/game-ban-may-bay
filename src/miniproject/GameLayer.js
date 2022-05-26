@@ -20,10 +20,15 @@ var GameLayer = cc.Layer.extend({
     platformBatch: null,
     space: null,
     numOfMap: null,
-    currentMapIndex: null,
-    bottomScreenY: null,
-    topScreenY: null,
+    currentScreenIndex: 0,
+
+    bottomScreenY: 0,
+    topScreenY: JJ.HEIGHT,
+    isAboveTopScreen: false,
+    isBelowBottomScreen: false,
+
     animationLayer: null,
+    isBackgroundMoveDone: true,
 
     ctor: function () {
         this._super();
@@ -39,9 +44,12 @@ var GameLayer = cc.Layer.extend({
             fontSize: 18,
             anchorX: 1,
             anchorY: 0,
-            x: winSize.width - 15,
-            y: winSize.height - 30,
+            // x: winSize.width - 15,
+            // y: winSize.height - 30,
         });
+        var absolutePosition = this.score.convertToWorldSpace(cc.p(winSize.width - 15, winSize.height - 30));
+        this.score.setPosition(absolutePosition);
+
 
         //Need to understand this line
         this.score.textAlign = cc.TEXT_ALIGNMENT_RIGHT;
@@ -62,6 +70,7 @@ var GameLayer = cc.Layer.extend({
         this.scheduleUpdate();
         this.schedule(this.scoreCounter, 1);
 
+
         return true;
     },
     initPhysics: function () {
@@ -72,16 +81,23 @@ var GameLayer = cc.Layer.extend({
         // setup walls
         var ground = new cp.SegmentShape(
             this.space.staticBody
-            , cp.v(0, 0) //start point
-            , cp.v(JJ.WIDTH, 0) //end point
+            , cp.v(-1000, 10) //start point
+            , cp.v(1000, 0) //end point
             , g_groundHeight // thickness of wall
         );
         ground.setFriction(100);
         // ground.setElasticity(10);
         this.space.addStaticShape(ground);
+        // setup collision handler
+        // this.space.addCollisionHandler(JJ.SPRITETAG.JUMPER, JJ.SPRITETAG.PLATFORM,
+        //     this.collisionPlatformBegin.bind(this), null, null, null);
+
         this.animationLayer = new AnimationLayer(this.space);
         this.jumper = this.animationLayer.getJumper();
         this.addChild(this.animationLayer, 3000, "Animation Layer");
+    },
+    collisionPlatformBegin: function(arbiter, space) {
+        cc.log("Headbang a platform");
     },
     initBackground: function () {
         this.map = new cc.Sprite(res.mapEntry_png);
@@ -98,19 +114,37 @@ var GameLayer = cc.Layer.extend({
         if (this.state == STATE_PLAYING) {
             // this.checkIsCollide();
             this.space.step(dt);
+            this.updateUI();
         }
     },
     updateUI: function () {
         // Update score if jumper is in a higher position.
-
-        // Go to next background if jumper jumps over the background celling
+        // Follow jumper if jumper jumps over the background celling
+        var jumperPosition = this.jumper.y;
+        // var middleScreenY = (this.bottomScreenY + this.topScreenY) / 2;
+        var followAction = cc.follow(this.jumper, cc.rect(0, 0, JJ.WIDTH, JJ.HEIGHT*2));
+        if (jumperPosition > this.topScreenY) {
+            // Update platform and jumper position: move up by subtract offset y
+            this.runAction(followAction);
+            this.bottomScreenY = this.topScreenY;
+            cc.log("Jumped over top screen");
+            return;
+        }
+        // cc.log("Bottom Screen " + this.bottomScreenY);
+        // cc.log("Top Screen " + this.topScreenY);
+        if (jumperPosition < this.bottomScreenY) {
+            cc.log("Droped over bottom screen");
+            this.topScreenY = this.bottomScreenY;
+            this.bottomScreenY = this.bottomScreenY - JJ.HEIGHT;
+            this.runAction(followAction.clone());
+            return;
+        }
 
     },
     addKeyBoardListener: function () {
         if (cc.sys.capabilities.hasOwnProperty('keyboard')) {
             cc.eventManager.addListener({
                 event: cc.EventListener.KEYBOARD,
-                swallowTouches: true,
                 onKeyPressed: function (key, event) {
                     JJ.KEYS[key] = true;
                 },

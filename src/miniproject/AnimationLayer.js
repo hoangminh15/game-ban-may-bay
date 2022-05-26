@@ -21,7 +21,7 @@ var AnimationLayer = cc.Layer.extend({
         // Set the spawn position of jumper
         this.body.p = cc.p(g_jumperStartX, g_groundHeight + JJ.JUMPERHEIGHT / 2);
         // apply impulse to the body
-        this.body.applyImpulse(cp.v(0, 0), cp.v(0, 100)) // run speed
+        // this.body.applyImpulse(cp.v(0, 0), cp.v(0, 100)) // run speed
         // add the created body to space (add PhysicsBody to PhysicsWorld)
         this.space.addBody(this.body);
         this.shape = new cp.BoxShape(this.body, 10, 1);
@@ -55,16 +55,15 @@ var AnimationLayer = cc.Layer.extend({
     getJumper: function() {
         return this.jumper;
     },
-    moveScreenUp: function() {
+    moveSpritesUp: function() {
         var platform = null;
-        this.createPlatforms();
         for (var i = 0; i < JJ.CONTAINER.PLATFORMS.length; i++) {
             platform = JJ.CONTAINER.PLATFORMS[i];
             platform.y = platform.y - JJ.WIDTH/2;
         }
         this.jumper.y -= JJ.WIDTH/2;
     },
-    moveScreenDown: function() {
+    moveSpritesDown: function() {
         var platform = null;
         for (var i = 0; i < JJ.CONTAINER.PLATFORMS.length; i++) {
             platform = JJ.CONTAINER.PLATFORMS[i];
