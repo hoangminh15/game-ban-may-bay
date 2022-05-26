@@ -30,6 +30,9 @@ var GameLayer = cc.Layer.extend({
     animationLayer: null,
     isBackgroundMoveDone: true,
 
+    backgroundLayer: null,
+
+
     ctor: function () {
         this._super();
         this.init();
@@ -37,23 +40,6 @@ var GameLayer = cc.Layer.extend({
     init: function () {
         g_sharedGameLayer = this;
         winSize = cc.winSize;
-
-        // Score
-        this.score = new cc.LabelTTF("Score: 0");
-        this.score.attr({
-            fontSize: 18,
-            anchorX: 1,
-            anchorY: 0,
-            // x: winSize.width - 15,
-            // y: winSize.height - 30,
-        });
-        var absolutePosition = this.score.convertToWorldSpace(cc.p(winSize.width - 15, winSize.height - 30));
-        this.score.setPosition(absolutePosition);
-
-
-        //Need to understand this line
-        this.score.textAlign = cc.TEXT_ALIGNMENT_RIGHT;
-        this.addChild(this.score, 1000);
 
         //Preset
         Background.preset();
@@ -69,7 +55,6 @@ var GameLayer = cc.Layer.extend({
         // Update
         this.scheduleUpdate();
         this.schedule(this.scoreCounter, 1);
-
 
         return true;
     },
@@ -90,7 +75,7 @@ var GameLayer = cc.Layer.extend({
         this.space.addStaticShape(ground);
         // setup collision handler
         // this.space.addCollisionHandler(JJ.SPRITETAG.JUMPER, JJ.SPRITETAG.PLATFORM,
-        //     this.collisionPlatformBegin.bind(this), null, null, null);
+        // this.collisionPlatformBegin.bind(this), null, null, null);
 
         this.animationLayer = new AnimationLayer(this.space);
         this.jumper = this.animationLayer.getJumper();
@@ -112,7 +97,6 @@ var GameLayer = cc.Layer.extend({
     },
     update: function (dt) {
         if (this.state == STATE_PLAYING) {
-            // this.checkIsCollide();
             this.space.step(dt);
             this.updateUI();
         }
@@ -122,26 +106,24 @@ var GameLayer = cc.Layer.extend({
         // Follow jumper if jumper jumps over the background celling
         var jumperPosition = this.jumper.y;
         var middleScreenY = (this.bottomScreenY + this.topScreenY) / 2;
-        var followAction = cc.follow(this.jumper, cc.rect(0, 0, JJ.WIDTH, JJ.HEIGHT * 2));
-        var followActionDown = cc.follow(this.jumper, cc.rect(0, -JJ.HEIGHT, JJ.WIDTH, JJ.HEIGHT * 2))
-        if (jumperPosition > middleScreenY) {
-            this.animationLayer.createPlatforms();
-        }
         if (jumperPosition > this.topScreenY) {
+            this.currentScreenIndex++;
             // Update platform and jumper position: move up by subtract offset y
+            var followAction = cc.follow(this.jumper, cc.rect(0, this.bottomScreenY, JJ.WIDTH, JJ.HEIGHT*2));
             this.runAction(followAction.clone());
             this.bottomScreenY = this.topScreenY - JJ.HEIGHT / 2;
             this.topScreenY = this.topScreenY + JJ.HEIGHT / 2;
-            // cc.log("Top screen: " + this.topScreenY);
-            // cc.log("Bottom screen: " + this.bottomScreenY);
-            // cc.log("Jumped over top screen");
+
+            cc.log("Jumped over top screen");
             return;
         }
         cc.log("Bottom Screen " + this.bottomScreenY);
         cc.log("Top Screen " + this.topScreenY);
 
         if (jumperPosition < this.bottomScreenY) {
+            this.currentScreenIndex--;
             // cc.log("Droped below bottom screen");
+            var followActionDown = cc.follow(this.jumper, cc.rect(0, this.bottomScreenY-JJ.HEIGHT, JJ.WIDTH, JJ.HEIGHT*2))
             this.topScreenY = this.bottomScreenY + JJ.HEIGHT / 2;
             this.bottomScreenY = this.bottomScreenY - JJ.HEIGHT / 2;
             this.runAction(followActionDown.clone());
@@ -162,15 +144,27 @@ var GameLayer = cc.Layer.extend({
         }
     },
     scoreCounter: function () {
-        if (this.state == STATE_PLAYING) {
-            this.score.setString(Math.floor(this.jumper.y).toString())
+        if (this.state === STATE_PLAYING) {
+            if (this.score !== null) {
+                this.score.setString(Math.floor(this.jumper.y).toString())
+            }
         }
+    },
+    setBackgroundLayer: function(backgroundLayer) {
+        this.backgroundLayer = backgroundLayer;
+    },
+    setScoreLabel: function(scoreLabel) {
+        this.score = scoreLabel;
     }
 });
 
 GameLayer.scene = function () {
     var scene = new cc.Scene();
-    var layer = new GameLayer();
-    scene.addChild(layer);
+    var gameLayer = new GameLayer();
+    var backgroundLayer = new BackgroundLayer();
+    gameLayer.setScoreLabel(backgroundLayer.getScoreLabel())
+    gameLayer.setBackgroundLayer(backgroundLayer);
+    scene.addChild(backgroundLayer, 5000);
+    scene.addChild(gameLayer);
     return scene;
 }

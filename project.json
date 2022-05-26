@@ -38,6 +38,7 @@
         "src/miniproject/Background.js",
         "src/miniproject/Platform.js",
         "src/miniproject/global.js",
-        "src/miniproject/AnimationLayer.js"
+        "src/miniproject/AnimationLayer.js",
+        "src/miniproject/BackgroundLayer.js"
     ]
 }

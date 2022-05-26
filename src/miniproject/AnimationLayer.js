@@ -37,7 +37,7 @@ var AnimationLayer = cc.Layer.extend({
     },
     createPlatforms: function() {
         // Create platform
-        for (var i = 1; i < 6; i++) {
+        for (var i = 1; i < 20; i++) {
             this.platform = new Platform(res.platform_png);
             var body = new cp.StaticBody();
             //Set width temporary
@@ -56,7 +56,4 @@ var AnimationLayer = cc.Layer.extend({
     getJumper: function() {
         return this.jumper;
     },
-    // getHighestPlatformHeight: function() {
-    //     return this.highestPlatformHeight;
-    // }
 })
