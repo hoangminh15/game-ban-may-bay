@@ -5,13 +5,18 @@ var Jumper = cc.PhysicsSprite.extend({
     zOrder: 3000,
     upKeyValidTimeLimit: 1,
     upKeyValidTime: 0,
+    jumperBody: null,
+    animationLayer: null,
 
-    ctor: function(image) {
+    ctor: function(image, animationLayer) {
         this._super(image);
+        this.animationLayer = animationLayer;
         this.anchorX = 0.5;
         this.anchorY = 0.5;
         this.tag = this.zOrder;
 
+        // Set jumper body.
+        this.jumperBody = this.getBody();
 
         this.scheduleUpdate();
     },
@@ -20,13 +25,6 @@ var Jumper = cc.PhysicsSprite.extend({
     },
 
     updateMove: function (dt) {
-        // Sửa các nhảy
-        if (JJ.KEYS[cc.KEY.up]) {
-            this.y += dt * this.speed;
-        }
-        if (JJ.KEYS[cc.KEY.down]) {
-            this.y -= dt * this.speed;
-        }
         //Đi sang trái hợp lệ
         if (JJ.KEYS[cc.KEY.left] && this.x >= this.width) {
             this.x -= dt * this.speed;

@@ -31,7 +31,7 @@ var GameLayer = cc.Layer.extend({
     isBackgroundMoveDone: true,
 
     backgroundLayer: null,
-
+    isJumperAirborne: false,
 
     ctor: function () {
         this._super();
@@ -51,6 +51,7 @@ var GameLayer = cc.Layer.extend({
         this.initBackground();
 
         //Listener
+        // cc.log(this.animationLayer)
         this.addKeyBoardListener();
         // Update
         this.scheduleUpdate();
@@ -62,7 +63,7 @@ var GameLayer = cc.Layer.extend({
         //setup static information
         this.space = new cp.Space();
         //setup gravity
-        this.space.gravity = cp.v(0, -350);
+        this.space.gravity = cp.v(0, -400);
         // setup walls
         var ground = new cp.SegmentShape(
             this.space.staticBody
@@ -71,18 +72,20 @@ var GameLayer = cc.Layer.extend({
             , g_groundHeight // thickness of wall
         );
         ground.setFriction(100);
-        // ground.setElasticity(10);
+        ground.setCollisionType(JJ.SPRITETAG.GROUND);
         this.space.addStaticShape(ground);
         // setup collision handler
-        // this.space.addCollisionHandler(JJ.SPRITETAG.JUMPER, JJ.SPRITETAG.PLATFORM,
-        // this.collisionPlatformBegin.bind(this), null, null, null);
+        this.space.addCollisionHandler(JJ.SPRITETAG.JUMPER, JJ.SPRITETAG.PLATFORM,
+        null, null, this.postCollision.bind(this), null);
+        this.space.addCollisionHandler(JJ.SPRITETAG.JUMPER, JJ.SPRITETAG.GROUND,
+            null, null, this.postCollision.bind(this), null);
 
         this.animationLayer = new AnimationLayer(this.space);
         this.jumper = this.animationLayer.getJumper();
         this.addChild(this.animationLayer, 3000, "Animation Layer");
     },
-    collisionPlatformBegin: function (arbiter, space) {
-        cc.log("Headbang a platform");
+    postCollision: function () {
+        this.isJumperAirborne = false;
     },
     initBackground: function () {
         this.map = new cc.Sprite(res.mapEntry_png);
@@ -96,7 +99,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.map, 500);
     },
     update: function (dt) {
-        if (this.state == STATE_PLAYING) {
+        if (this.state === STATE_PLAYING) {
             this.space.step(dt);
             this.updateUI();
         }
@@ -105,24 +108,17 @@ var GameLayer = cc.Layer.extend({
         // Update score if jumper is in a higher position.
         // Follow jumper if jumper jumps over the background celling
         var jumperPosition = this.jumper.y;
-        var middleScreenY = (this.bottomScreenY + this.topScreenY) / 2;
         if (jumperPosition > this.topScreenY) {
-            this.currentScreenIndex++;
-            // Update platform and jumper position: move up by subtract offset y
             var followAction = cc.follow(this.jumper, cc.rect(0, this.bottomScreenY, JJ.WIDTH, JJ.HEIGHT*2));
             this.runAction(followAction.clone());
             this.bottomScreenY = this.topScreenY - JJ.HEIGHT / 2;
             this.topScreenY = this.topScreenY + JJ.HEIGHT / 2;
-
-            cc.log("Jumped over top screen");
             return;
         }
-        cc.log("Bottom Screen " + this.bottomScreenY);
-        cc.log("Top Screen " + this.topScreenY);
+        // cc.log("Bottom Screen " + this.bottomScreenY);
+        // cc.log("Top Screen " + this.topScreenY);
 
         if (jumperPosition < this.bottomScreenY) {
-            this.currentScreenIndex--;
-            // cc.log("Droped below bottom screen");
             var followActionDown = cc.follow(this.jumper, cc.rect(0, this.bottomScreenY-JJ.HEIGHT, JJ.WIDTH, JJ.HEIGHT*2))
             this.topScreenY = this.bottomScreenY + JJ.HEIGHT / 2;
             this.bottomScreenY = this.bottomScreenY - JJ.HEIGHT / 2;
@@ -131,13 +127,28 @@ var GameLayer = cc.Layer.extend({
 
     },
     addKeyBoardListener: function () {
+        self = this;
         if (cc.sys.capabilities.hasOwnProperty('keyboard')) {
             cc.eventManager.addListener({
                 event: cc.EventListener.KEYBOARD,
                 onKeyPressed: function (key, event) {
+                    if (key === cc.KEY.up){
+                        if (self.isJumperAirborne) return;
+                        self.animationLayer.jumpByImpulse();
+                        self.isJumperAirborne = true;
+                        return;
+                    }
+                    if (key === cc.KEY.escape) {
+                        var scene = new cc.Scene();
+                        var layer = new SystemMenu();
+                        scene.addChild(layer);
+                        cc.director.runScene(new cc.TransitionFade(1.2, scene));
+                    }
                     JJ.KEYS[key] = true;
+
                 },
                 onKeyReleased: function (key, event) {
+                    if (key === cc.KEY.up) return;
                     JJ.KEYS[key] = false;
                 }
             }, this);

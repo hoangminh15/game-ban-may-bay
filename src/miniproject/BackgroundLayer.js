@@ -12,8 +12,7 @@ var BackgroundLayer = cc.Layer.extend({
             anchorX: 1,
             anchorY: 0,
             x: winSize.width - 15,
-            y: winSize.height - 30,
-            color: (255, 0, 0)
+            y: winSize.height - 30
         });
         //Need to understand this line
         this.score.textAlign = cc.TEXT_ALIGNMENT_RIGHT;
